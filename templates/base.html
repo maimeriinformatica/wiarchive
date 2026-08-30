@@ -16,6 +16,8 @@
     <input type="search" name="q" placeholder="Cerca in tutto l'archivio" value="{{ request.args.get('q','') }}" aria-label="Cerca">
   </form>
   <nav>
+    <a class="voce sezione {% if request.path.startswith('/videoteca') %}attiva{% endif %}" href="{{ url_for('videos') }}">Videoteca</a>
+    <div class="linguetta">Siti archiviati</div>
     {% set ns = namespace(cat=None) %}
     {% for s in sites %}
       {% if s.category != ns.cat %}{% set ns.cat = s.category %}

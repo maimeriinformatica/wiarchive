@@ -39,6 +39,22 @@ Apri l'indirizzo `https://….onrender.com`, entra con `admin` e la password sce
 ## Prova sul proprio PC
 Copia `.env.example` in `.env`, compila i valori (puoi usare lo stesso Supabase) e lancia `./avvia-locale.sh` (Linux/Mac) oppure, su Windows, imposta le variabili e `waitress-serve --listen=0.0.0.0:8080 app:app`. Senza `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` le copie offline finiscono in `data/archive/` (solo per test; il database Postgres resta obbligatorio).
 
+## Videoteca (archivio video)
+
+Sezione a parte per conservare video da link (YouTube, Vimeo, link diretti a file). I video sono grandi, quindi vanno in uno storage più capiente dei siti: **Cloudflare R2** (10 GB gratuiti, nessun costo di traffico, poi ~0,015 $/GB al mese) o qualunque storage compatibile S3 (es. Backblaze B2).
+
+### Configurare R2
+1. dash.cloudflare.com → **R2 Object Storage** → attivalo (chiede un metodo di pagamento anche per il piano gratuito) → *Create bucket*, nome `archivio-video`, privato.
+2. *R2 → API → Manage API tokens → Create API token*: permesso **Object Read & Write** sul bucket. Copia **Access Key ID** e **Secret Access Key**.
+3. L'endpoint è `https://<ACCOUNT-ID>.r2.cloudflarestorage.com` (l'Account ID è mostrato nella pagina R2).
+4. Su Render compila `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` (e `S3_BUCKET` se hai usato un altro nome).
+
+### Come funziona
+- *Gestione → Video*: incolli il link, scegli categoria e descrizione; lo scarico parte in sottofondo (qualità fino a 720p, limite 1500 MB — regolabili con `VIDEO_MAX_HEIGHT` e `VIDEO_MAX_MB`).
+- Chi consulta trova la sezione **Videoteca** nel menù e guarda i video in streaming direttamente nel portale (link temporanei firmati: il bucket resta privato).
+- Sul piano free di Render lo scarico si interrompe se l'app si addormenta: per video lunghi tieni aperta la pagina o valuta il piano Starter.
+- **Attenzione ai termini d'uso**: molte piattaforme (YouTube inclusa) vietano lo scarico dei contenuti salvo dove espressamente permesso. Usa la videoteca per contenuti tuoi, autorizzati o con licenza libera; i diritti restano di chi ha pubblicato.
+
 ## Uso quotidiano
 1. **Gestione → Categorie**: crea le sezioni della wiki.
 2. **Gestione → Siti**: nome, indirizzo, categoria, massimo pagine, profondità. Lo scarico parte in sottofondo; *Aggiorna* lo ripete, *Elimina* toglie tutto (anche dallo Storage).
@@ -51,4 +67,4 @@ Copia `.env.example` in `.env`, compila i valori (puoi usare lo stesso Supabase)
 - I contenuti scaricati restano di chi li ha pubblicati: l'archivio è pensato per consultazione riservata. Verifica le condizioni d'uso dei siti prima di distribuirli a terzi.
 
 ## File
-`app.py` rotte e accesso · `db.py` Postgres · `storage.py` Supabase Storage (o cartella locale) · `crawler.py` scarico · `templates/` pagine (`templates/admin/` area amministrativa) · `static/style.css`
+`app.py` rotte e accesso · `db.py` Postgres · `storage.py` Supabase Storage · `videostore.py` R2/S3 · `videodl.py` scarico video · `crawler.py` scarico · `templates/` pagine (`templates/admin/` area amministrativa) · `static/style.css`

@@ -49,6 +49,12 @@ def init():
         UNIQUE(site_id, url));
     CREATE INDEX IF NOT EXISTS pages_tsv_idx ON pages USING GIN(tsv);
     CREATE INDEX IF NOT EXISTS pages_site_idx ON pages(site_id);
+    CREATE TABLE IF NOT EXISTS videos(
+        id SERIAL PRIMARY KEY, title TEXT DEFAULT '', url TEXT NOT NULL,
+        category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+        description TEXT DEFAULT '', status TEXT DEFAULT 'in attesa', note TEXT DEFAULT '',
+        storage_key TEXT DEFAULT '', uploader TEXT DEFAULT '', duration INTEGER DEFAULT 0,
+        size_mb REAL DEFAULT 0, last_download TEXT DEFAULT '', created_at TIMESTAMPTZ DEFAULT now());
     """)
     if not q("SELECT 1 FROM users LIMIT 1", one=True):
         q("INSERT INTO users(username, pw, is_admin) VALUES(%s,%s,TRUE)",
@@ -134,3 +140,24 @@ def search(text, limit=50):
 def stats():
     return {"siti": q("SELECT COUNT(*) AS n FROM sites", one=True)["n"],
             "pagine": q("SELECT COUNT(*) AS n FROM pages", one=True)["n"]}
+
+
+# ---- video
+def list_videos():
+    return q("""SELECT v.*, c.name AS category FROM videos v
+        LEFT JOIN categories c ON c.id=v.category_id ORDER BY c.name NULLS LAST, v.title""")
+
+def get_video(vid):
+    return q("SELECT * FROM videos WHERE id=%s", (vid,), one=True)
+
+def add_video(url, title, category_id, description):
+    r = q("""INSERT INTO videos(url,title,category_id,description) VALUES(%s,%s,%s,%s) RETURNING id""",
+          (url, title, category_id, description), one=True)
+    return r["id"]
+
+def update_video(vid, **kw):
+    sets = ", ".join(f"{k}=%s" for k in kw)
+    q(f"UPDATE videos SET {sets} WHERE id=%s", (*kw.values(), vid))
+
+def delete_video(vid):
+    q("DELETE FROM videos WHERE id=%s", (vid,))

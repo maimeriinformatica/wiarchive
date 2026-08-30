@@ -113,3 +113,8 @@ body.naviga{display:flex;flex-direction:column;height:100vh}
 .barra-naviga .titolo{color:rgba(255,255,255,.75)}
 .barra-naviga .spazio{flex:1}
 .cornice{flex:1;border:0;width:100%;background:#fff}
+
+/* ---- videoteca */
+.voce.sezione{font-weight:600;margin-top:10px;font-family:var(--serif);font-size:1rem}
+.lettore{width:100%;max-width:880px;background:#000;border-radius:4px;display:block}
+.video-scheda{border-top-color:var(--inchiostro)}

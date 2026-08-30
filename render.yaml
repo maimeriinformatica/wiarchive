@@ -20,3 +20,15 @@ services:
         value: archivio
       - key: ADMIN_PASSWORD
         sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: S3_BUCKET
+        value: archivio-video
+      - key: VIDEO_MAX_MB
+        value: "1500"
+      - key: VIDEO_MAX_HEIGHT
+        value: "720"

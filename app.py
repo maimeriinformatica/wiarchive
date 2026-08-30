@@ -9,7 +9,7 @@ from flask import (Flask, render_template, request, redirect, url_for, session,
                    Response, abort, flash)
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash
-import db, crawler, storage
+import db, crawler, storage, videodl, videostore
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # Render sta dietro un proxy HTTPS
@@ -111,6 +111,13 @@ def offline_file(sid, name):
         abort(404)
     found = storage.get(f"{sid}/{name}") or abort(404)
     content, ctype = found
+    # il tipo lo decide l'estensione: certi storage rispondono con un tipo
+    # generico e il browser mostrerebbe il codice invece della pagina
+    import mimetypes
+    guessed = mimetypes.guess_type(name)[0]
+    ctype = guessed or ctype or "application/octet-stream"
+    if ctype.startswith("text/") and "charset" not in ctype:
+        ctype += "; charset=utf-8"
     return Response(content, content_type=ctype)
 
 @app.route("/cerca")
@@ -119,6 +126,31 @@ def search():
     text = request.args.get("q", "").strip()
     results = db.search(text) if text else []
     return render_template("search.html", q=text, results=results)
+
+@app.route("/videoteca")
+@login_required
+def videos():
+    cats = {}
+    for v in db.list_videos():
+        cats.setdefault(v["category"] or "Senza categoria", []).append(v)
+    return render_template("video.html", cats=cats)
+
+@app.route("/videoteca/<int:vid>")
+@login_required
+def video(vid):
+    v = db.get_video(vid) or abort(404)
+    src = None
+    if v["storage_key"]:
+        src = videostore.url_for_player(v["storage_key"]) or url_for("video_stream", vid=vid)
+    return render_template("video_player.html", v=v, src=src)
+
+@app.route("/videoteca/<int:vid>/file")
+@login_required
+def video_stream(vid):
+    from flask import send_file
+    v = db.get_video(vid) or abort(404)
+    path = videostore.local_path(v["storage_key"]) or abort(404)
+    return send_file(path, conditional=True)
 
 @app.route("/password", methods=["GET", "POST"])
 @login_required
@@ -161,6 +193,30 @@ def admin_site(sid, action):
         storage.delete_prefix(f"{sid}/")
         db.delete_site(sid); flash(f"«{s['name']}» eliminato dall'archivio.")
     return redirect(url_for("admin"))
+
+@app.route("/admin/video", methods=["GET", "POST"])
+@admin_required
+def admin_videos():
+    if request.method == "POST":
+        vid = db.add_video(request.form["url"].strip(), request.form.get("title", "").strip(),
+                           int(request.form["category_id"]), request.form.get("description", ""))
+        threading.Thread(target=videodl.download_video, args=(vid,), daemon=True).start()
+        flash("Video aggiunto: lo scarico in sottofondo. Ricarica per vedere l'avanzamento.")
+        return redirect(url_for("admin_videos"))
+    return render_template("admin/video.html", videos=db.list_videos(), categories=db.list_categories())
+
+@app.route("/admin/video/<int:vid>/<action>", methods=["POST"])
+@admin_required
+def admin_video(vid, action):
+    v = db.get_video(vid) or abort(404)
+    if action == "riprova":
+        threading.Thread(target=videodl.download_video, args=(vid,), daemon=True).start()
+        flash("Scarico riavviato.")
+    elif action == "elimina":
+        if v["storage_key"]:
+            videostore.delete(v["storage_key"])
+        db.delete_video(vid); flash("Video eliminato dall'archivio.")
+    return redirect(url_for("admin_videos"))
 
 @app.route("/admin/categorie", methods=["GET", "POST"])
 @admin_required

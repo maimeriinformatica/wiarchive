@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}{{ v.title or 'Video' }}{% endblock %}
+{% block content %}
+<header class="testata">
+  <div class="briciole"><a href="{{ url_for('videos') }}">Videoteca</a> / {{ v.category or 'Senza categoria' }}</div>
+  <h1>{{ v.title or 'Video' }}</h1>
+  {% if v.uploader %}<p class="sotto">{{ v.uploader }}</p>{% endif %}
+  <p class="fonte">Fonte <a href="{{ v.url }}" target="_blank" rel="noopener">{{ v.url }}</a>{% if v.last_download %} · archiviato il {{ v.last_download }}{% endif %}{% if v.size_mb %} · {{ v.size_mb }} MB{% endif %}</p>
+</header>
+{% if src %}
+<video class="lettore" controls preload="metadata" src="{{ src }}"></video>
+{% elif v.status == 'errore' %}
+<div class="avviso">Lo scarico non è riuscito: {{ v.note }}</div>
+{% else %}
+<div class="vuoto">Il video è {{ v.status }}: ricarica la pagina tra poco.</div>
+{% endif %}
+{% if v.description %}<article class="testo"><p>{{ v.description }}</p></article>{% endif %}
+{% endblock %}

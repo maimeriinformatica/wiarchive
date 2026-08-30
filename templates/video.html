@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Videoteca{% endblock %}
+{% block content %}
+<header class="testata"><h1>Videoteca</h1>
+<p class="sotto">Video conservati nell'archivio, organizzati per argomento.</p></header>
+{% if not cats %}<div class="vuoto">Nessun video ancora. {% if session.admin %}<a href="{{ url_for('admin_videos') }}">Aggiungine uno dalla gestione</a>.{% endif %}</div>{% endif %}
+{% for cat, lista in cats.items() %}
+<section class="categoria">
+  <h2>{{ cat }}</h2>
+  <div class="griglia">
+  {% for v in lista %}
+    <a class="scheda video-scheda" href="{{ url_for('video', vid=v.id) }}">
+      <strong>{{ v.title or 'Video' }}</strong>
+      {% if v.uploader %}<span class="url">{{ v.uploader }}</span>{% endif %}
+      {% if v.description %}<p>{{ v.description }}</p>{% endif %}
+      <span class="meta">{% if v.duration %}{{ '%d:%02d'|format(v.duration//60, v.duration%60) }} · {% endif %}{% if v.size_mb %}{{ v.size_mb }} MB · {% endif %}{{ v.status }}</span>
+    </a>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

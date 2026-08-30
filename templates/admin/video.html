@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}{% block title %}Video{% endblock %}
+{% block content %}
+<header class="testata"><h1>Videoteca</h1><p class="sotto">Incolla il link di un video (YouTube, Vimeo, link diretto a un file): viene scaricato e conservato nell'archivio video.</p></header>
+
+<section class="blocco">
+<h2>Aggiungi un video</h2>
+{% if not categories %}<p class="vuoto">Prima <a href="{{ url_for('admin_categories') }}">crea almeno una categoria</a>.</p>{% else %}
+<form method="post" class="modulo">
+  <label>Link del video <input name="url" type="url" required placeholder="https://www.youtube.com/watch?v=…"></label>
+  <label>Titolo (vuoto = automatico) <input name="title" placeholder="preso dal video se lo lasci vuoto"></label>
+  <label>Categoria <select name="category_id">{% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></label>
+  <label>Descrizione <input name="description" placeholder="Perché questo video è in archivio"></label>
+  <button>Scarica e archivia</button>
+</form>{% endif %}
+</section>
+
+<section class="blocco">
+<table>
+<tr><th>Video</th><th>Categoria</th><th>Stato</th><th>Dimensione</th><th>Archiviato</th><th></th></tr>
+{% for v in videos %}
+<tr><td><a href="{{ url_for('video', vid=v.id) }}">{{ v.title or 'Video' }}</a><br><small>{{ v.url }}</small></td>
+<td>{{ v.category or '—' }}</td><td>{{ v.status }}{% if v.note %}<br><small>{{ v.note }}</small>{% endif %}</td>
+<td>{{ v.size_mb or '—' }} MB</td><td>{{ v.last_download or '—' }}</td>
+<td class="azioni">
+ <form method="post" action="{{ url_for('admin_video', vid=v.id, action='riprova') }}"><button>Riprova</button></form>
+ <form method="post" action="{{ url_for('admin_video', vid=v.id, action='elimina') }}" onsubmit="return confirm('Eliminare questo video?')"><button class="pericolo">Elimina</button></form>
+</td></tr>
+{% else %}<tr><td colspan="6" class="vuoto">Nessun video ancora.</td></tr>{% endfor %}
+</table>
+</section>
+{% endblock %}

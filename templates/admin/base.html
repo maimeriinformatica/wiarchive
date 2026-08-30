@@ -7,6 +7,7 @@
   <span class="marchio-riga">Amministrazione</span>
   <nav>
     <a href="{{ url_for('admin') }}" {% if request.path=='/admin' %}class="attiva"{% endif %}>Siti</a>
+    <a href="{{ url_for('admin_videos') }}" {% if request.path.startswith('/admin/video') %}class="attiva"{% endif %}>Video</a>
     <a href="{{ url_for('admin_categories') }}" {% if 'categorie' in request.path %}class="attiva"{% endif %}>Categorie</a>
     <a href="{{ url_for('admin_users') }}" {% if 'utenti' in request.path %}class="attiva"{% endif %}>Utenti</a>
   </nav>
