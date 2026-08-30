@@ -95,6 +95,15 @@ def page(pid):
     s = db.get_site(p["site_id"])
     return render_template("page.html", page=p, site=s)
 
+@app.route("/naviga/<int:sid>")
+@login_required
+def browse(sid):
+    s = db.get_site(sid) or abort(404)
+    start = request.args.get("p") or os.path.basename(crawler.key_for(sid, s["url"], True))
+    if "/" in start or ".." in start:
+        abort(404)
+    return render_template("naviga.html", site=s, start=start)
+
 @app.route("/archivio/<int:sid>/<name>")
 @login_required
 def offline_file(sid, name):

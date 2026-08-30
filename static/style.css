@@ -103,3 +103,13 @@ body.admin{display:block}
 .barra-admin a:hover,.barra-admin a.attiva{background:rgba(0,0,0,.25);opacity:1}
 .barra-admin .spazio{flex:1}
 body.admin main{max-width:1100px;margin:0 auto;padding:36px 32px 80px}
+
+/* ---- navigazione della copia archiviata */
+body.naviga{display:flex;flex-direction:column;height:100vh}
+.barra-naviga{display:flex;align-items:center;gap:18px;padding:10px 20px;background:var(--inchiostro);color:#fff;font-size:.88rem;flex:none}
+.barra-naviga a{color:#fff;text-decoration:none;opacity:.85}
+.barra-naviga a:hover{opacity:1;text-decoration:underline}
+.barra-naviga .indietro{padding:4px 10px;background:var(--ceralacca);border-radius:4px;opacity:1}
+.barra-naviga .titolo{color:rgba(255,255,255,.75)}
+.barra-naviga .spazio{flex:1}
+.cornice{flex:1;border:0;width:100%;background:#fff}

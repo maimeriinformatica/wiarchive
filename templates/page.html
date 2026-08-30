@@ -4,7 +4,7 @@
   <div class="briciole"><a href="{{ url_for('index') }}">Indice</a> / <a href="{{ url_for('site', sid=site.id) }}">{{ site.name }}</a></div>
   <h1>{{ page.title }}</h1>
   <p class="fonte">Originale <a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }}</a>
-  {% if page.offline_key %} · <a class="bottone" href="{{ url_for('offline_file', sid=site.id, name=page.offline_key.split('/')[-1]) }}" target="_blank">Apri la copia offline</a>{% endif %}</p>
+  {% if page.offline_key %} · <a class="bottone" href="{{ url_for('browse', sid=site.id, p=page.offline_key.split('/')[-1]) }}">Apri la copia originale</a>{% endif %}</p>
 </header>
 <article class="testo">
 {% for par in page.text.split('\n') if par.strip() %}<p>{{ par }}</p>{% endfor %}

@@ -4,7 +4,7 @@
   <div class="briciole"><a href="{{ url_for('index') }}">Indice</a> / {{ site.category }}</div>
   <h1>{{ site.name }}</h1>
   <p class="sotto">{{ site.description }}</p>
-  <p class="fonte">Fonte <a href="{{ site.url }}" target="_blank" rel="noopener">{{ site.url }}</a> · stato: {{ site.status }} ({{ site.pages_done }} pagine){% if site.note %} · {{ site.note }}{% endif %}</p>
+  <p class="fonte"><a class="bottone" href="{{ url_for('browse', sid=site.id) }}">Naviga il sito come l'originale</a> · Fonte <a href="{{ site.url }}" target="_blank" rel="noopener">{{ site.url }}</a> · stato: {{ site.status }} ({{ site.pages_done }} pagine){% if site.note %} · {{ site.note }}{% endif %}</p>
 </header>
 {% if not pages %}<div class="vuoto">Nessuna pagina ancora scaricata. Se lo scarico è in corso, ricarica tra poco.</div>{% endif %}
 <ol class="elenco-pagine">

@@ -131,10 +131,6 @@ def _crawl(site_id):
 
         for base in soup.find_all("base"):
             base.decompose()
-        banner = soup.new_tag("div", style="background:#1C2430;color:#fff;padding:6px 12px;font:13px sans-serif")
-        banner.string = f"Copia d'archivio di {url} — scaricata il {time.strftime('%d/%m/%Y')}"
-        if soup.body:
-            soup.body.insert(0, banner)
         storage.put(page_key, str(soup).encode("utf-8"))
         db.upsert_page(site_id, url, title, text, summary, page_key)
 

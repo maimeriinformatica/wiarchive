@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ site.name }} · navigazione d'archivio</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body class="naviga">
+<header class="barra-naviga">
+  <a class="indietro" href="{{ url_for('site', sid=site.id) }}">&larr; Torna all'archivio</a>
+  <span class="titolo">Copia archiviata di <strong>{{ site.name }}</strong>{% if site.last_crawl %} · scaricata il {{ site.last_crawl }}{% endif %}</span>
+  <span class="spazio"></span>
+  <a href="{{ site.url }}" target="_blank" rel="noopener">Sito originale &nearr;</a>
+</header>
+<iframe class="cornice" src="{{ url_for('offline_file', sid=site.id, name=start) }}" title="Copia archiviata di {{ site.name }}"></iframe>
+</body></html>
