@@ -19,7 +19,8 @@ def put(key, content):
         ctype = mimetypes.guess_type(key)[0] or "application/octet-stream"
         r = requests.post(f"{SUPABASE_URL}/storage/v1/object/{BUCKET}/{key}", data=content,
                           headers={**_headers, "Content-Type": ctype, "x-upsert": "true"}, timeout=60)
-        r.raise_for_status()
+        if r.status_code >= 400:
+            raise RuntimeError(f"Storage {r.status_code} su {BUCKET}/{key}: {r.text[:200]}")
     else:
         path = os.path.join(LOCAL_DIR, key)
         os.makedirs(os.path.dirname(path), exist_ok=True)
