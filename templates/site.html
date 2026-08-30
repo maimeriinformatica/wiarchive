@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}{{ site.name }}{% endblock %}
+{% block content %}
+<header class="testata">
+  <div class="briciole"><a href="{{ url_for('index') }}">Indice</a> / {{ site.category }}</div>
+  <h1>{{ site.name }}</h1>
+  <p class="sotto">{{ site.description }}</p>
+  <p class="fonte">Fonte <a href="{{ site.url }}" target="_blank" rel="noopener">{{ site.url }}</a> · stato: {{ site.status }} ({{ site.pages_done }} pagine){% if site.note %} · {{ site.note }}{% endif %}</p>
+</header>
+{% if not pages %}<div class="vuoto">Nessuna pagina ancora scaricata. Se lo scarico è in corso, ricarica tra poco.</div>{% endif %}
+<ol class="elenco-pagine">
+{% for p in pages %}
+  <li><a href="{{ url_for('page', pid=p.id) }}">{{ p.title }}</a><span class="url">{{ p.url }}</span>{% if p.summary %}<p>{{ p.summary }}</p>{% endif %}</li>
+{% endfor %}
+</ol>
+{% endblock %}

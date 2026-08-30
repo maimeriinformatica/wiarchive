@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}{% block title %}Siti{% endblock %}
+{% block content %}
+<header class="testata"><h1>Siti in archivio</h1><p class="sotto">{{ stats.siti }} siti, {{ stats.pagine }} pagine. Chi consulta vede solo ciò che è elencato qui.</p></header>
+
+<section class="blocco">
+<h2>Aggiungi un sito da scaricare</h2>
+{% if not categories %}<p class="vuoto">Prima <a href="{{ url_for('admin_categories') }}">crea almeno una categoria</a>.</p>{% else %}
+<form method="post" action="{{ url_for('admin_add_site') }}" class="modulo">
+  <label>Nome <input name="name" required placeholder="es. Consorzio Pro Loco Valpolicella"></label>
+  <label>Indirizzo <input name="url" type="url" required placeholder="https://…"></label>
+  <label>Categoria <select name="category_id">{% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></label>
+  <label>Descrizione <input name="description" placeholder="Perché questo sito è in archivio"></label>
+  <label>Massimo pagine <input name="max_pages" type="number" value="200" min="1" max="2000"></label>
+  <label>Profondità link <input name="max_depth" type="number" value="3" min="0" max="10"></label>
+  <button>Scarica e archivia</button>
+</form>{% endif %}
+</section>
+
+<section class="blocco">
+<table>
+<tr><th>Sito</th><th>Categoria</th><th>Stato</th><th>Pagine</th><th>Ultimo scarico</th><th></th></tr>
+{% for s in sites %}
+<tr><td><a href="{{ url_for('site', sid=s.id) }}">{{ s.name }}</a><br><small>{{ s.url }}</small></td>
+<td>{{ s.category or '—' }}</td><td>{{ s.status }}{% if s.note %}<br><small>{{ s.note }}</small>{% endif %}</td>
+<td>{{ s.pages_done }} / {{ s.max_pages }}</td><td>{{ s.last_crawl or '—' }}</td>
+<td class="azioni">
+ <form method="post" action="{{ url_for('admin_site', sid=s.id, action='aggiorna') }}"><button>Aggiorna</button></form>
+ <form method="post" action="{{ url_for('admin_site', sid=s.id, action='elimina') }}" onsubmit="return confirm('Eliminare {{ s.name }} e tutte le sue pagine?')"><button class="pericolo">Elimina</button></form>
+</td></tr>
+{% else %}<tr><td colspan="6" class="vuoto">Nessun sito ancora. Aggiungine uno qui sopra.</td></tr>{% endfor %}
+</table>
+</section>
+{% endblock %}

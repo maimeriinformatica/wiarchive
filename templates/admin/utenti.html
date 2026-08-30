@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}{% block title %}Utenti{% endblock %}
+{% block content %}
+<header class="testata"><h1>Utenti con accesso</h1><p class="sotto">Le password le scegli tu e le comunichi alla persona; ognuno può poi cambiarla dalla propria area.</p></header>
+
+<section class="blocco">
+<h2>Crea un accesso</h2>
+<form method="post" class="modulo"><input type="hidden" name="act" value="crea">
+ <label>Nome utente <input name="username" required autocomplete="off"></label>
+ <label>Password <input name="password" type="text" minlength="8" required autocomplete="off" placeholder="almeno 8 caratteri"></label>
+ <label class="check"><input type="checkbox" name="is_admin"> Amministratore (può gestire siti e utenti)</label>
+ <button>Crea utente</button></form>
+</section>
+
+<section class="blocco">
+<table><tr><th>Utente</th><th>Ruolo</th><th>Creato</th><th>Nuova password</th><th></th></tr>
+{% for u in users %}
+<tr><td>{{ u.username }}</td><td>{% if u.is_admin %}amministratore{% else %}consultazione{% endif %}</td>
+<td>{{ u.created_at.strftime('%d/%m/%Y') if u.created_at else '' }}</td>
+<td><form method="post" class="inline-form"><input type="hidden" name="act" value="password"><input type="hidden" name="uid" value="{{ u.id }}"><input name="password" type="text" minlength="8" required placeholder="nuova password" autocomplete="off"> <button class="piccolo">Imposta</button></form></td>
+<td class="azioni">{% if not u.is_admin %}<form method="post" onsubmit="return confirm('Togliere l\'accesso a {{ u.username }}?')"><input type="hidden" name="act" value="elimina"><input type="hidden" name="uid" value="{{ u.id }}"><button class="pericolo piccolo">Rimuovi</button></form>{% endif %}</td></tr>
+{% endfor %}
+</table>
+</section>
+{% endblock %}

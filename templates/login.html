@@ -1,0 +1,12 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accesso · Archivio privato</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body class="accesso">
+<form method="post" class="scheda-accesso">
+  <h1>Archivio privato</h1>
+  <p class="sotto">Consultazione riservata. Accedi con le credenziali che ti sono state date.</p>
+  {% if err %}<div class="errore">{{ err }}</div>{% endif %}
+  <label>Nome utente <input name="username" autofocus required></label>
+  <label>Password <input name="password" type="password" required></label>
+  <button>Entra</button>
+</form>
+</body></html>

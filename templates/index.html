@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}Indice{% endblock %}
+{% block content %}
+<header class="testata"><h1>Indice dell'archivio</h1>
+<p class="sotto">Copie conservate di siti scelti, riorganizzate per argomento. Ogni pagina esiste in due forme: il testo pulito e la copia originale navigabile.</p></header>
+{% if not cats %}
+<div class="vuoto">L'archivio è vuoto. {% if session.admin %}<a href="{{ url_for('admin') }}">Aggiungi il primo sito</a>.{% else %}Chiedi all'amministratore di aggiungere dei siti.{% endif %}</div>
+{% endif %}
+{% for cat, lista in cats.items() %}
+<section class="categoria">
+  <h2>{{ cat }}</h2>
+  <div class="griglia">
+  {% for s in lista %}
+    <a class="scheda" href="{{ url_for('site', sid=s.id) }}">
+      <strong>{{ s.name }}</strong>
+      <span class="url">{{ s.url }}</span>
+      {% if s.description %}<p>{{ s.description }}</p>{% endif %}
+      <span class="meta">{{ s.n_pages }} pagine · {{ s.status }}{% if s.last_crawl %} · {{ s.last_crawl }}{% endif %}</span>
+    </a>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

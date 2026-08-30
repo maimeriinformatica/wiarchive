@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Gestione{% endblock %} · Amministrazione archivio</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body class="admin">
+<header class="barra-admin">
+  <span class="marchio-riga">Amministrazione</span>
+  <nav>
+    <a href="{{ url_for('admin') }}" {% if request.path=='/admin' %}class="attiva"{% endif %}>Siti</a>
+    <a href="{{ url_for('admin_categories') }}" {% if 'categorie' in request.path %}class="attiva"{% endif %}>Categorie</a>
+    <a href="{{ url_for('admin_users') }}" {% if 'utenti' in request.path %}class="attiva"{% endif %}>Utenti</a>
+  </nav>
+  <span class="spazio"></span>
+  <a href="{{ url_for('index') }}">Vai alla consultazione</a>
+  <a href="{{ url_for('logout') }}">Esci</a>
+</header>
+<main>
+  {% with msgs = get_flashed_messages() %}{% for m in msgs %}<div class="avviso">{{ m }}</div>{% endfor %}{% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body></html>

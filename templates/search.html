@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Ricerca{% endblock %}
+{% block content %}
+<header class="testata"><h1>{% if q %}Risultati per «{{ q }}»{% else %}Ricerca{% endif %}</h1>
+<p class="sotto">{{ results|length }} pagine trovate in tutto l'archivio.</p></header>
+<ol class="elenco-pagine">
+{% for r in results %}
+  <li><a href="{{ url_for('page', pid=r.id) }}">{{ r.title }}</a><span class="url">{{ r.site }} · {{ r.url }}</span><p>{{ r.snip|safe }}</p></li>
+{% endfor %}
+</ol>
+{% endblock %}

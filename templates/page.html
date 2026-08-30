@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}{{ page.title }}{% endblock %}
+{% block content %}
+<header class="testata">
+  <div class="briciole"><a href="{{ url_for('index') }}">Indice</a> / <a href="{{ url_for('site', sid=site.id) }}">{{ site.name }}</a></div>
+  <h1>{{ page.title }}</h1>
+  <p class="fonte">Originale <a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }}</a>
+  {% if page.offline_key %} · <a class="bottone" href="{{ url_for('offline_file', sid=site.id, name=page.offline_key.split('/')[-1]) }}" target="_blank">Apri la copia offline</a>{% endif %}</p>
+</header>
+<article class="testo">
+{% for par in page.text.split('\n') if par.strip() %}<p>{{ par }}</p>{% endfor %}
+{% if not page.text.strip() %}<p class="vuoto">Da questa pagina non è stato estratto testo leggibile: consulta la copia offline.</p>{% endif %}
+</article>
+<section class="note">
+  <h2>Note dell'archivio</h2>
+  {% if session.admin %}
+  <form method="post"><textarea name="notes" rows="4" placeholder="Commenti, contesto, perché questa pagina è in archivio…">{{ page.notes }}</textarea><button>Salva note</button></form>
+  {% elif page.notes %}<p>{{ page.notes }}</p>{% else %}<p class="vuoto">Nessuna nota.</p>{% endif %}
+</section>
+{% endblock %}

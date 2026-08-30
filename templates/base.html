@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Archivio{% endblock %} · Archivio privato</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<aside class="schedario">
+  <a class="marchio" href="{{ url_for('index') }}">
+    <span class="marchio-riga">Archivio</span>
+    <span class="marchio-sotto">{{ stats.siti }} siti · {{ stats.pagine }} pagine</span>
+  </a>
+  <form class="cerca" action="{{ url_for('search') }}" method="get">
+    <input type="search" name="q" placeholder="Cerca in tutto l'archivio" value="{{ request.args.get('q','') }}" aria-label="Cerca">
+  </form>
+  <nav>
+    {% set ns = namespace(cat=None) %}
+    {% for s in sites %}
+      {% if s.category != ns.cat %}{% set ns.cat = s.category %}
+        <div class="linguetta">{{ s.category or 'Senza categoria' }}</div>
+      {% endif %}
+      <a class="voce {% if request.path.startswith('/sito/' ~ s.id) %}attiva{% endif %}" href="{{ url_for('site', sid=s.id) }}">
+        {{ s.name }}<small>{{ s.n_pages }}</small>
+      </a>
+    {% endfor %}
+  </nav>
+  <div class="piede">
+    <span>{{ session.user }}</span>
+    <a href="{{ url_for('own_password') }}">Password</a>
+    {% if session.admin %}<a href="{{ url_for('admin') }}">Gestione</a>{% endif %}
+    <a href="{{ url_for('logout') }}">Esci</a>
+  </div>
+</aside>
+<main>
+  {% with msgs = get_flashed_messages() %}{% for m in msgs %}<div class="avviso">{{ m }}</div>{% endfor %}{% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

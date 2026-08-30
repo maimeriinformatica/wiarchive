@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}{% block title %}Categorie{% endblock %}
+{% block content %}
+<header class="testata"><h1>Categorie</h1><p class="sotto">Sono le sezioni della wiki. Eliminando una categoria i suoi siti restano, senza categoria.</p></header>
+<section class="blocco">
+<table><tr><th>Nome</th><th></th></tr>
+{% for c in categories %}<tr><td>{{ c.name }}</td><td class="azioni"><form method="post"><input type="hidden" name="delete" value="{{ c.id }}"><button class="pericolo piccolo">Elimina</button></form></td></tr>{% endfor %}
+</table>
+<form method="post" class="inline"><input name="name" required placeholder="Nuova categoria"><button>Aggiungi</button></form>
+</section>
+{% endblock %}
