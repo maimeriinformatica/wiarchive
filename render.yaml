@@ -1,34 +1,25 @@
 services:
   - type: web
-    name: archivio-privato
-    runtime: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: waitress-serve --listen=0.0.0.0:$PORT --threads=8 app:app
+    name: wiarchive
+    runtime: node
+    plan: starter            # il disco persistente richiede un piano a pagamento
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/site
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.12.4"
-      - key: SECRET_KEY
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: SESSION_SECRET
         generateValue: true
-      - key: DATABASE_URL
+      - key: ADMIN_EMAIL
         sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
-        sync: false
-      - key: SUPABASE_BUCKET
-        value: archivio
       - key: ADMIN_PASSWORD
         sync: false
-      - key: S3_ENDPOINT
-        sync: false
-      - key: S3_ACCESS_KEY
-        sync: false
-      - key: S3_SECRET_KEY
-        sync: false
-      - key: S3_BUCKET
-        value: archivio-video
-      - key: VIDEO_MAX_MB
-        value: "1500"
-      - key: VIDEO_MAX_HEIGHT
-        value: "720"
+      - key: MAX_UPLOAD_MB
+        value: "4096"
+    disk:
+      name: wiarchive-data
+      mountPath: /var/data
+      sizeGB: 50
