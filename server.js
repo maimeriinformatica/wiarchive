@@ -10,6 +10,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 const Database = require('better-sqlite3');
+const radar = require('./radar');
 
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -113,7 +114,7 @@ const wrap = (fn) => (req, res) => { try { fn(req, res); } catch (e) { console.e
 
 // ─── Query helpers
 const VIDEO_SELECT = `SELECT v.id,v.code,v.title,v.slug,v.summary,v.thumb,v.duration,v.views,v.published_at,v.featured,v.episode,
-  v.program_id,v.category_id,p.name program_name,p.slug program_slug,c.name category_name,c.slug category_slug,c.color category_color
+  v.program_id,v.category_id,v.source_name,p.name program_name,p.slug program_slug,c.name category_name,c.slug category_slug,c.color category_color
   FROM videos v LEFT JOIN programs p ON p.id=v.program_id LEFT JOIN categories c ON c.id=v.category_id`;
 const PUB = `v.status='published' AND (v.published_at IS NULL OR v.published_at<=datetime('now'))`;
 const pubVideos = (where = '', params = [], order = 'v.published_at DESC', limit = 24, offset = 0) =>
@@ -134,8 +135,9 @@ app.get('/api/home', wrap((req, res) => {
   const programs = db.prepare('SELECT id,name,slug,host,schedule,cover FROM programs WHERE active=1 ORDER BY position,name').all();
   const rows = db.prepare('SELECT id,name,slug,color FROM categories ORDER BY position,name').all()
     .map((c) => ({ ...c, videos: pubVideos('v.category_id=?', [c.id], 'v.published_at DESC', 6) })).filter((c) => c.videos.length);
-  const news = db.prepare(`SELECT id,title,slug,kicker,summary,author,cover,published_at FROM articles WHERE status='published' ORDER BY published_at DESC LIMIT 4`).all();
-  res.json({ featured, latest, popular, programs, rows, news, live: { on: getSetting('live_on') === '1', title: getSetting('live_title') } });
+  const news = db.prepare(`SELECT id,title,slug,kicker,summary,author,cover,published_at,origin,source_count FROM articles WHERE status='published' AND (origin IS NULL OR origin<>'radar') ORDER BY published_at DESC LIMIT 4`).all();
+  const world = db.prepare(`SELECT id,title,slug,kicker,summary,author,published_at,origin,source_count FROM articles WHERE status='published' AND origin='radar' ORDER BY published_at DESC LIMIT 6`).all();
+  res.json({ featured, latest, popular, programs, rows, news, world, live: { on: getSetting('live_on') === '1', title: getSetting('live_title') } });
 }));
 
 app.get('/api/videos', wrap((req, res) => {
@@ -179,7 +181,7 @@ app.get('/api/categories/:slug', wrap((req, res) => {
 }));
 
 app.get('/api/articles', wrap((req, res) => {
-  res.json(db.prepare(`SELECT a.id,a.title,a.slug,a.kicker,a.summary,a.author,a.cover,a.published_at,c.name category_name,c.color category_color
+  res.json(db.prepare(`SELECT a.id,a.title,a.slug,a.kicker,a.summary,a.author,a.cover,a.published_at,a.origin,a.source_count,c.name category_name,c.color category_color
     FROM articles a LEFT JOIN categories c ON c.id=a.category_id WHERE a.status='published' ORDER BY a.published_at DESC LIMIT 60`).all());
 }));
 app.get('/api/articles/:slug', wrap((req, res) => {
@@ -275,7 +277,7 @@ adm.get('/stats', wrap((req, res) => {
   });
 }));
 
-adm.get('/videos', wrap((req, res) => res.json(db.prepare(`SELECT v.id,v.code,v.title,v.slug,v.status,v.featured,v.views,v.duration,v.thumb,v.file,v.size,v.published_at,
+adm.get('/videos', wrap((req, res) => res.json(db.prepare(`SELECT v.id,v.code,v.title,v.slug,v.status,v.featured,v.views,v.duration,v.thumb,v.file,v.size,v.published_at,v.embed_url,v.source_name,
   p.name program_name,c.name category_name FROM videos v LEFT JOIN programs p ON p.id=v.program_id LEFT JOIN categories c ON c.id=v.category_id ORDER BY v.created_at DESC`).all())));
 adm.get('/videos/:id', wrap((req, res) => res.json(db.prepare('SELECT * FROM videos WHERE id=?').get(req.params.id) || {})));
 
@@ -398,10 +400,13 @@ adm.post('/me/password', wrap((req, res) => {
   res.json({ ok: true });
 }));
 
+// Radar notizie: raccolta automatica dalle fonti, confronto e pubblicazione
+const RADAR = radar.init({ db, adm, getSetting, setSetting, uniqueSlug, nextCode, requireAdmin });
+
 app.use('/api/admin', adm);
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use('/api', (req, res) => res.status(404).json({ error: 'Risorsa non trovata' }));
 app.get('/{*splat}', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 if (require.main === module) app.listen(PORT, () => console.log(`[WIARCHIVE] in ascolto su http://localhost:${PORT}`));
-module.exports = { app, db };
+module.exports = { app, db, RADAR };

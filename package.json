@@ -17,7 +17,9 @@
     "better-sqlite3": "^13.0.3",
     "cookie-session": "^2.1.1",
     "express": "^5.2.1",
-    "multer": "^2.4.0"
+    "multer": "^2.4.0",
+    "rss-parser": "^3.13.0",
+    "sanitize-html": "^2.18.1"
   },
   "engines": {
     "node": "22.x"

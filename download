@@ -1,0 +1,4 @@
+node_modules/
+data/
+proto/clip.mp4
+.DS_Store
